@@ -25,7 +25,7 @@ object Pegman extends App {
         line <- box
         text <- line
       } yield {
-        new CoodWithDirection(1, 1, text)
+        new CoodWithDirection(1, 1, text)//TODO : index 제대로 받아야 함.
       }
     }
 
@@ -53,7 +53,7 @@ object Pegman extends App {
       }
 
       private def onLeft: Boolean = {
-        coodWithDirections.filter(element => ((element.y == this.y) && (element.x < this.x))).length > 0
+        coodWithDirections.filter(element => ((element.y == this.y) && (element.x < this.x))).length > 0//TODO:컴파일 에러 잡자
       }
 
       private def onRight: Boolean = {
