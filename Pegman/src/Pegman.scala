@@ -1,4 +1,4 @@
-import java.io.{FileInputStream, FileOutputStream}
+import java.io.{FileOutputStream, FileInputStream}
 
 import scala.io.StdIn
 
@@ -9,8 +9,58 @@ object Pegman extends App {
   val path = "D:\\dev\\intellySpace\\scala\\Pegman\\src\\"
   Console.setIn(new FileInputStream(path + "example.in"))
 
-  //  Console.setIn(new FileInputStream("C-large-practice.in"))
-  //  Console.setOut(new FileOutputStream("C-large-practice.out"))
+
+  Console.setIn(new FileInputStream(path +"A-small-practice.in"))
+  Console.setOut(new FileOutputStream(path +"A-small-practice.out"))
+
+  Console.setIn(new FileInputStream(path +"A-large-practice.in"))
+  Console.setOut(new FileOutputStream(path +"A-large-practice.out"))
+
+  class CoodWithDirection(val x: Int, val y: Int, val direction: Char) {
+    private val otherDirections = {
+      Array('<', '>', 'v', '^').filter(_ != this.direction)
+    }
+    var coodWithDirections: IndexedSeq[CoodWithDirection] = null
+
+    def hasPointOnDirection: Boolean = {
+      if (direction == '.') return true
+      if (direction == '>' && onRight) return true
+      if (direction == '<' && onLeft) return true
+      if (direction == '^' && onUp) return true
+      if (direction == 'v' && onDown) return true
+      false
+    }
+
+    def hasPointOnOtherDirection: Boolean = {
+      otherDirections.filter(_ match {
+        case '>' => onRight
+        case '<' => onLeft
+        case '^' => onUp
+        case 'v' => onDown
+      }).length > 0
+    }
+
+    private def onLeft: Boolean = {
+      coodWithDirections.filter(element => ((element.y == this.y) && (element.x < this.x)) && element.direction != '.').length > 0
+    }
+
+    private def onRight: Boolean = {
+      coodWithDirections.filter(element => ((element.y == this.y) && (element.x > this.x)) && element.direction != '.').length > 0
+    }
+
+    private def onUp: Boolean = {
+      //      println(coodWithDirections.filter(element => ((element.x == this.x) && (element.y < this.y)) && element.direction != '.').length)
+      //
+      //      println(coodWithDirections.filter(element => element.direction != ".").length)
+      //
+      //      coodWithDirections.foreach(e => if(e.direction != '.')println("not equal"))
+      coodWithDirections.filter(element => ((element.x == this.x) && (element.y < this.y)) && element.direction != '.').length > 0
+    }
+
+    private def onDown: Boolean = {
+      coodWithDirections.filter(element => ((element.x == this.x) && (element.y > this.y)) && element.direction != '.').length > 0
+    }
+  }
 
   /**
    * solve
@@ -19,58 +69,23 @@ object Pegman extends App {
    */
   def solve(box: IndexedSeq[Array[Char]]): String = {
     var result = 0
-
+    var index1 = 0
+    var index2 = 0
     val coodWithDirections = {
       for {
-        line <- box
-        text <- line
+        index1 <- 0 until box.length
+        line = box(index1)
+        index2 <- 0 until line.length
       } yield {
-        new CoodWithDirection(1, 1, text)//TODO : index 제대로 받아야 함.
-      }
-    }
-
-    class CoodWithDirection(x: Int, y: Int, direction: Char) {
-      val otherDirections = {
-        Array('<', '>', 'v', '^').filter(_ != this.direction)
-      }
-
-      def hasPointOnDirection: Boolean = {
-        if (direction == '.') true
-        if (direction == '>' && onRight) true
-        if (direction == '<' && onLeft) true
-        if (direction == '^' && onUp) true
-        if (direction == 'v' && onDown) true
-        false
-      }
-
-      def hasPointOnOtherDirection: Boolean = {
-        otherDirections.filter(_ match {
-          case '>' => onRight
-          case '<' => onLeft
-          case '^' => onUp
-          case 'v' => onDown
-        }).length > 0
-      }
-
-      private def onLeft: Boolean = {
-        coodWithDirections.filter(element => ((element.y == this.y) && (element.x < this.x))).length > 0//TODO:컴파일 에러 잡자
-      }
-
-      private def onRight: Boolean = {
-        coodWithDirections.filter(element => ((element.y == this.y) && (element.x > this.x))).length > 0
-      }
-
-      private def onUp: Boolean = {
-        coodWithDirections.filter(element => ((element.x == this.x) && (element.y < this.y))).length > 0
-      }
-
-      private def onDown: Boolean = {
-        coodWithDirections.filter(element => ((element.x == this.x) && (element.y > this.y))).length > 0
+        new CoodWithDirection(index2 + 1, index1 + 1, line(index2))
       }
     }
 
     try {
       coodWithDirections.foreach(coodWithDirection => {
+        coodWithDirection.coodWithDirections = coodWithDirections
+        //        println(coodWithDirection.hasPointOnDirection)
+        //        println(coodWithDirection.hasPointOnOtherDirection)
         if (coodWithDirection.hasPointOnDirection) {
           //doNoting
         } else if (coodWithDirection.hasPointOnOtherDirection) {
@@ -80,7 +95,7 @@ object Pegman extends App {
         }
       })
     } catch {
-      case ex: RuntimeException => "IMPOSSIBLE"
+      case ex: RuntimeException => return "IMPOSSIBLE"
     }
     result.toString
   }
